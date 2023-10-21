@@ -13,6 +13,7 @@ interface ICartContext {
   cartBasePrice: number;
   cartTotalDiscount: number;
   addProductToCart: (product: CartProduct) => void;
+  decreaseProductQuantity: (productId: string) => void;
 }
 
 export const CartContext = createContext<ICartContext>({
@@ -21,12 +22,14 @@ export const CartContext = createContext<ICartContext>({
   cartBasePrice: 0,
   cartTotalDiscount: 0,
   addProductToCart: () => {},
+  decreaseProductQuantity: () => {},
 });
 
 const CartProvider = ({ children }: { children: React.ReactNode }) => {
   const [products, setProducts] = useState<CartProduct[]>([]);
 
   const addProductToCart = (product: CartProduct) => {
+    // Se o produto ja estiver no carrinho, apenas aumente a quantidade
     const productIsAlreadyOnCart = products.some(
       (cartProduct) => cartProduct.id === product.id,
     );
@@ -48,7 +51,29 @@ const CartProvider = ({ children }: { children: React.ReactNode }) => {
       return;
     }
 
+    // Se não, adicione o produto a lista
     setProducts((prev) => [...prev, product]);
+  };
+
+  const decreaseProductQuantity = (productId: string) => {
+    // Se a quantidade for 1, remova o produto do carrinho
+
+    // Se não, diminua a quantidade em 1
+
+    setProducts((prev) =>
+      prev
+        .map((cartProduct) => {
+          if (cartProduct.id === productId) {
+            return {
+              ...cartProduct,
+              quantity: cartProduct.quantity - 1,
+            };
+          }
+
+          return cartProduct;
+        })
+        .filter((cartProduct) => cartProduct.quantity > 0),
+    );
   };
 
   return (
@@ -59,6 +84,7 @@ const CartProvider = ({ children }: { children: React.ReactNode }) => {
         cartBasePrice: 0,
         cartTotalDiscount: 0,
         addProductToCart,
+        decreaseProductQuantity,
       }}
     >
       {children}
